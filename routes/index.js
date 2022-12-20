@@ -4,6 +4,7 @@
  */
 var express = require('express');
 const jwt = require("jsonwebtoken");
+const getAuth = require("./auth/auth").getAuth;
 var router = express.Router();
 
 /* GET home page. */
@@ -75,5 +76,22 @@ router.get('/cameras', function(req,res,next) {
   ]
   res.json(debugCameras);
 });
+
+router.get('/check', async function (req, res, next) {
+
+  console.log("query = ",req?.headers);
+  if (req?.headers?.token) {
+    try {
+      const token = await getAuth(req?.headers?.token);
+      res.status(200).send("Valid");
+    }
+    catch (e) {
+      res.status(401).send("Unauthorized");
+    }
+  } else {
+    res.status(401).send("Unauthorized");
+  }
+});
+
 
 module.exports = router;
