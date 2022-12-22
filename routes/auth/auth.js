@@ -14,16 +14,16 @@ const sqlite3 = require('sqlite3').verbose();
 const getAuth = (token) => {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(process.env?.CONFIG_DB);
-        const dbres = db.get("SELECT `users`.userid, `users`.login  FROM `tokens` LEFT JOIN `users` USING (userid) WHERE token=? ", [token], (err, dbres) => {
-            console.log("db result  =", dbres);
+        const sToken = token.replace('Bearer ','');
+        db.get("SELECT `users`.userid, `users`.login, `users`.cameraconfig, `users`.sensorconfig  FROM `tokens` LEFT JOIN `users` USING (userid) WHERE token=? ", [sToken], (err, dbres) => {
+            //console.log("db result  =", dbres);
 
             if (dbres?.userid > 0) {
-                console.log("valid user id")
+                //console.log("valid user id")
                 resolve(dbres);
             } else {
                 reject("Wrong token")
             }})
         });
 }
-
 module.exports = {getAuth};

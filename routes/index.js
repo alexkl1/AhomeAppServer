@@ -2,15 +2,15 @@
  * Simple express router logic
  * @type {function(): app}
  */
-var express = require('express');
+const express = require('express');
 const jwt = require("jsonwebtoken");
 const getAuth = require("./auth/auth").getAuth;
-var router = express.Router();
-
-/* GET home page. */
+const sqlite3 = require('sqlite3').verbose();
+const router = express.Router();
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
+
 
 /**
  * authentication
@@ -20,7 +20,6 @@ router.post('/auth', function(req,res,next) {
   //console.log("Config=",process.env?.CONFIG_DB);
   if (req?.query?.login?.length>2 && req?.query?.password?.length>2)
   {
-    const sqlite3 = require('sqlite3').verbose();
     const db = new sqlite3.Database(process.env?.CONFIG_DB);
     const dbres = db.get("SELECT * FROM `users` WHERE login=? and password=? ", [req?.query.login,req?.query.password],(err,dbres)=>{
       console.log ( "db result  =",dbres);
@@ -68,13 +67,39 @@ router.get('/sensors',function(req,res,next) {
 /**
  * Get camera array with feed urls
  */
-router.get('/cameras', function(req,res,next) {
+router.get('/cameras', async function (req, res, next) {
 
-  const debugCameras = [
+  const token = await getAuth(req?.headers?.authorization);
+  console.log("Token = " ,req?.headers?.authorization);
+  if (token)
+  {
+    if (token?.cameraconfig) {
+      // make feed urls
+      try {
+        const camconfig = JSON.parse(token?.cameraconfig).map(
+            i => {
+              return {id: i?.id, snapshotUrl: '/feed/?id=' + i?.id}
+            });
+        //console.log("camconfig=",camconfig);
+        res.json(camconfig);
+      }
+      catch (e)
+      {
+        console.log("Exception: ",e);
+        res.status(500).send(e.message);
+      }
+    }
+    else res.status(204).send("No content");
+  }
+  else
+  {
+    res.status(401).send("Unauthorized");
+  }
+  /*const debugCameras = [
     {id: 'CAMERA1', snapshotUrl: 'http://macbook-pro-alexander.local:8096/feed/cam1'},
     {id: 'CAMERA2', snapshotUrl: 'http://macbook-pro-alexander.local:8096/feed/cam2'},
-  ]
-  res.json(debugCameras);
+  ]*/
+  //res.json(debugCameras);
 });
 
 router.get('/check', async function (req, res, next) {
