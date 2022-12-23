@@ -16,12 +16,13 @@ router.get('/', function(req, res, next) {
  * authentication
  */
 router.post('/auth', function(req,res,next) {
-  console.log("authentication request: ",req?.query);
+  console.log("authentication request: ",req?.body);
+  console.log("request params: ", req?.body);      // your JSON
   //console.log("Config=",process.env?.CONFIG_DB);
-  if (req?.query?.login?.length>2 && req?.query?.password?.length>2)
+  if (req?.body?.login?.length>2 && req?.body?.password?.length>2)
   {
     const db = new sqlite3.Database(process.env?.CONFIG_DB);
-    const dbres = db.get("SELECT * FROM `users` WHERE login=? and password=? ", [req?.query.login,req?.query.password],(err,dbres)=>{
+    const dbres = db.get("SELECT * FROM `users` WHERE login=? and password=? ", [req?.body.login.toLowerCase(),req?.body.password],(err,dbres)=>{
       console.log ( "db result  =",dbres);
 
       if (dbres?.userid>0)
@@ -35,7 +36,8 @@ router.post('/auth', function(req,res,next) {
         const now = Date.now();
         const replres= db.run("REPLACE INTO `tokens` (`userid`,`token`,`created`) VALUES (?, ?, ?)",[dbres?.userid, token, now]);
         const result={
-          token: token
+          token: token,
+          user: dbres?.login
         }
         res.json(result);
       }
@@ -47,7 +49,7 @@ router.post('/auth', function(req,res,next) {
   }
   else
   {
-    res.status(400).send("Invalid login / password");
+    res.status(400).send("No params");
   }
 });
 
@@ -104,7 +106,7 @@ router.get('/cameras', async function (req, res, next) {
 
 router.get('/check', async function (req, res, next) {
 
-  console.log("query = ",req?.headers);
+  console.log("headers =  ",req?.headers);
   if (req?.headers?.token) {
     try {
       const token = await getAuth(req?.headers?.token);
