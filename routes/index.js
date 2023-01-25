@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const jwt = require("jsonwebtoken");
+const {default: axios} = require("axios");
 const getAuth = require("./auth/auth").getAuth;
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
@@ -56,14 +57,43 @@ router.post('/auth', function(req,res) {
 /**
  * Get sensors array
  */
-router.get('/sensors',function(req,res) {
+router.get('/sensors',async function (req, res) {
 
-  const debugSensors = [
-    {id: 'ROOM1', value: Math.random()*19, minValue: -100, maxValue: 100, Name:'Room sensor'},
-    {id: 'ROOM2', value: Math.random()*19, minValue: -100, maxValue: 100, Name:'Another room sensor'}
-  ]
+  const token = await getAuth(req?.headers?.authorization);
 
-  res.json(debugSensors);
+  if (token) {
+    console.log("Token = ", token);
+
+    try {
+      const sensorconfig = JSON.parse(token?.sensorconfig);
+      const promisesAr = sensorconfig.map(i=>new Promise(async resolve => {
+        console.log("Querying sensor: ", i);
+        const axres = await axios.get(i?.url, {
+          //responseType: 'arraybuffer',
+          headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}
+        })
+
+        resolve({id: i?.id, name: i?.name, temp: axres?.data?.temp_floor});
+      }))
+
+      const promisesRes = await Promise.all(promisesAr);
+      res.json(promisesRes);
+      return;
+    } catch (e) {
+      console.log("Exception: ", e);
+      res.status(500).send(e.message);
+    }
+
+    /*const debugSensors = [
+      {id: 'ROOM1', value: Math.random() * 19, minValue: -100, maxValue: 100, Name: 'Room sensor'},
+      {id: 'ROOM2', value: Math.random() * 19, minValue: -100, maxValue: 100, Name: 'Another room sensor'}
+    ]
+
+    res.json(debugSensors);*/
+  } else {
+    res.status(401).send("Unauthorized");
+  }
+
 });
 
 /**
