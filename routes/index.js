@@ -7,15 +7,15 @@ const jwt = require("jsonwebtoken");
 const getAuth = require("./auth/auth").getAuth;
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', function(req, res) {
+  res.send("AhomeServer");
 });
 
 
 /**
  * authentication
  */
-router.post('/auth', function(req,res,next) {
+router.post('/auth', function(req,res) {
   console.log("authentication request: ",req?.body);
   console.log("request params: ", req?.body);      // your JSON
   //console.log("Config=",process.env?.CONFIG_DB);
@@ -56,7 +56,7 @@ router.post('/auth', function(req,res,next) {
 /**
  * Get sensors array
  */
-router.get('/sensors',function(req,res,next) {
+router.get('/sensors',function(req,res) {
 
   const debugSensors = [
     {id: 'ROOM1', value: Math.random()*19, minValue: -100, maxValue: 100, Name:'Room sensor'},
@@ -71,31 +71,31 @@ router.get('/sensors',function(req,res,next) {
  */
 router.get('/cameras', async function (req, res, next) {
 
-  const token = await getAuth(req?.headers?.authorization);
-  console.log("Token = " ,req?.headers?.authorization);
-  if (token)
-  {
-    if (token?.cameraconfig) {
-      // make feed urls
-      try {
-        const camconfig = JSON.parse(token?.cameraconfig).map(
-            i => {
-              return {id: i?.id, snapshotUrl: '/feed/?id=' + i?.id}
-            });
-        //console.log("camconfig=",camconfig);
-        res.json(camconfig);
-      }
-      catch (e)
-      {
-        console.log("Exception: ",e);
-        res.status(500).send(e.message);
-      }
+  try {
+    const token = await getAuth(req?.headers?.authorization);
+    console.log("Token = ", req?.headers?.authorization);
+    if (token) {
+      if (token?.cameraconfig) {
+        // make feed urls
+        try {
+          const camconfig = JSON.parse(token?.cameraconfig).map(
+              i => {
+                return {id: i?.id, snapshotUrl: '/feed/?id=' + i?.id}
+              });
+          //console.log("camconfig=",camconfig);
+          res.json(camconfig);
+        } catch (e) {
+          console.log("Exception: ", e);
+          res.status(500).send(e.message);
+        }
+      } else res.status(204).send("No content");
+    } else {
+      res.status(401).send("Unauthorized");
     }
-    else res.status(204).send("No content");
   }
-  else
+  catch (e)
   {
-    res.status(401).send("Unauthorized");
+    res.status(401).send("Unauthorized / token");
   }
   /*const debugCameras = [
     {id: 'CAMERA1', snapshotUrl: 'http://macbook-pro-alexander.local:8096/feed/cam1'},

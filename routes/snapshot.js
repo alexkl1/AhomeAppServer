@@ -22,7 +22,7 @@ router.get('/', async function (req, res, next) {
                     const axres = await axios.get(camconfig?.snapshotUrl,{responseType: 'arraybuffer', headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}})
                     res.status(200).contentType("image/jpeg").send(axres?.data);//.send("token="+token);
                 } catch (e) {
-                    res.status(500).send("Error config");
+                    res.status(500).send("Error config "+e.message);
                 }
 
             } catch (e) {
