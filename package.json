@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "package": "docker rmi --force alexkl1/ahomeappserver && docker build . -t alexkl1/ahomeappserver"
   },
   "dependencies": {
     "axios": "^1.2.1",

@@ -58,30 +58,40 @@ router.post('/auth', function(req,res) {
  * Get sensors array
  */
 router.get('/sensors',async function (req, res) {
-
-  const token = await getAuth(req?.headers?.authorization);
-
-  if (token) {
-    console.log("Token = ", token);
-
     try {
-      const sensorconfig = JSON.parse(token?.sensorconfig);
-      const promisesAr = sensorconfig.map(i=>new Promise(async resolve => {
-        console.log("Querying sensor: ", i);
-        const axres = await axios.get(i?.url, {
-          //responseType: 'arraybuffer',
-          timeout: 30000,
-          headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}
-        }).catch((err)=>{
-          console.log("Axios catch error: ",err);
-        })
+      const token = await getAuth(req?.headers?.authorization);
 
-        resolve({id: i?.id, type:'temp', name: i?.name, minValue: -50, maxValue:100, value: axres?.data?.temp_floor});
-      }))
+      if (token) {
+        console.log("Token = ", token);
+        const sensorconfig = JSON.parse(token?.sensorconfig);
+        const promisesAr = sensorconfig.map(i => new Promise(async resolve => {
+          console.log("Querying sensor: ", i);
+          const axres = await axios.get(i?.url, {
+            //responseType: 'arraybuffer',
+            timeout: 30000,
+            headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}
+          }).catch((err) => {
+            console.log("Axios catch error: ", err);
+          })
 
-      const promisesRes = await Promise.all(promisesAr);
-      res.json(promisesRes);
-      return;
+          resolve({
+            id: i?.id,
+            type: 'temp',
+            name: i?.name,
+            minValue: -50,
+            maxValue: 100,
+            value: axres?.data?.temp_floor
+          });
+        }))
+
+        const promisesRes = await Promise.all(promisesAr);
+        res.json(promisesRes);
+        return;
+      }
+      else
+      {
+        res.status(400).send("Not authorized");
+      }
     } catch (e) {
       console.log("Exception: ", e);
       res.status(500).send(e.message);
@@ -93,9 +103,8 @@ router.get('/sensors',async function (req, res) {
     ]
 
     res.json(debugSensors);*/
-  } else {
-    res.status(401).send("Unauthorized");
-  }
+
+
 
 });
 
