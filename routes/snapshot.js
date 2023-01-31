@@ -23,7 +23,7 @@ router.get('/', async function (req, res, next) {
                         responseType: 'arraybuffer',
                         timeout: 60000,
                         headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}}).catch((err)=>{
-                            console.log("Axios catch error: ",err);
+                            //console.log("Axios catch error: ",err);
                     })
                     res.status(200).contentType("image/jpeg").send(axres?.data);//.send("token="+token);
                 } catch (e) {

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "startforever": "forever -c 'nodemon --exitcrash' ./bin/www",
     "package": "docker rmi --force alexkl1/ahomeappserver && docker build . -t alexkl1/ahomeappserver"
   },
   "dependencies": {
@@ -12,11 +13,13 @@
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
+    "forever": "^4.0.3",
     "helmet": "^6.0.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
+    "nodemon": "^2.0.20",
     "react-native-swiper": "^1.6.0",
     "sqlite3": "^5.1.4"
   }

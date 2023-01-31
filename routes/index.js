@@ -71,7 +71,7 @@ router.get('/sensors',async function (req, res) {
             timeout: 30000,
             headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}
           }).catch((err) => {
-            console.log("Axios catch error: ", err);
+            //console.log("Axios catch error: ", err);
           })
 
           resolve({
