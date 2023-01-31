@@ -10,16 +10,21 @@ const axios = require("axios").default;
  * @TODO use authentication middleware
  */
 router.get('/', async function (req, res, next) {
-    console.log("Snapshot ", req?.headers);
+    //console.log("Snapshot ", req?.headers);
     if (req?.query?.id) {
         if (req?.headers?.authorization) {
             try {
                 const token = await getAuth(req?.headers?.authorization);
-                console.log("Token = ", token);
+                //console.log("Token = ", token);
                 try {
                     const camconfig = JSON.parse(token?.cameraconfig).find(i => i?.id === req?.query?.id);
-                    console.log("Cam config = ", camconfig);
-                    const axres = await axios.get(camconfig?.snapshotUrl,{responseType: 'arraybuffer', headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}})
+                    //console.log("Cam config = ", camconfig);
+                    const axres = await axios.get(camconfig?.snapshotUrl,{
+                        responseType: 'arraybuffer',
+                        timeout: 60000,
+                        headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}}).catch((err)=>{
+                            console.log("Axios catch error: ",err);
+                    })
                     res.status(200).contentType("image/jpeg").send(axres?.data);//.send("token="+token);
                 } catch (e) {
                     res.status(500).send("Error config "+e.message);

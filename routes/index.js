@@ -70,10 +70,13 @@ router.get('/sensors',async function (req, res) {
         console.log("Querying sensor: ", i);
         const axres = await axios.get(i?.url, {
           //responseType: 'arraybuffer',
+          timeout: 30000,
           headers: {...(process?.env?.AUTHKEY && {'AUTHKEY': process?.env?.AUTHKEY})}
+        }).catch((err)=>{
+          console.log("Axios catch error: ",err);
         })
 
-        resolve({id: i?.id, name: i?.name, temp: axres?.data?.temp_floor});
+        resolve({id: i?.id, type:'temp', name: i?.name, minValue: -50, maxValue:100, value: axres?.data?.temp_floor});
       }))
 
       const promisesRes = await Promise.all(promisesAr);

@@ -15,7 +15,7 @@ const getAuth = (token) => {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(process.env?.CONFIG_DB);
         const sToken = token?.replace('Bearer ','');
-        console.log("Check token = ",token, sToken);
+        //console.log("Check token = ",token, sToken);
         db.get("SELECT `users`.userid, `users`.login, `users`.cameraconfig, `users`.sensorconfig  FROM `tokens` LEFT JOIN `users` USING (userid) WHERE token=? ", [sToken], (err, dbres) => {
             //console.log("db result  =", dbres);
 
