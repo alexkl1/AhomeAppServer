@@ -22,5 +22,5 @@ Simple Express.js based backend for  home surveillance and monitoring applicatio
 # how to run
     npm start: run backend server
     npm startforever: run backend server with autorestart on update or crash 
-    npm package to create docker image 
+    npm package to create docker image (docker.env file must be created)
     
