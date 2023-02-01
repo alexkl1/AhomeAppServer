@@ -62,10 +62,10 @@ router.get('/sensors',async function (req, res) {
       const token = await getAuth(req?.headers?.authorization);
 
       if (token) {
-        console.log("Token = ", token);
+        //console.log("Token = ", token);
         const sensorconfig = JSON.parse(token?.sensorconfig);
         const promisesAr = sensorconfig.map(i => new Promise(async resolve => {
-          console.log("Querying sensor: ", i);
+          //console.log("Querying sensor: ", i);
           const axres = await axios.get(i?.url, {
             //responseType: 'arraybuffer',
             timeout: 30000,
