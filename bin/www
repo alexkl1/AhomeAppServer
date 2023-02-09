@@ -24,12 +24,14 @@ app.set('port', port);
  * Create HTTP/S server.
  */
 let server = null;
-if (Boolean(process.env?.USEHTTPS) === true) {
+const useHttps = process?.env?.USEHTTPS == 'true'
+//console.log("usehttps = ",process?.env?.USEHTTPS, Boolean(0), Boolean(parseInt(process?.env?.USEHTTPS)));
+if (Boolean(parseInt(process.env?.USEHTTPS)) === true) {
     console.log("Starting HTTPS server on port ", process.env.PORT);
     const credentials = {
-        key:  fs.readFileSync(process.env.SSL_PRIVKEY, 'utf8'),
-        cert:  fs.readFileSync(process.env.SSL_CERT, 'utf8'),
-        ca:  fs.readFileSync(process.env.SSL_PRIVKEY, 'utf8'),
+        key: fs.readFileSync(process.env.SSL_PRIVKEY, 'utf8'),
+        cert: fs.readFileSync(process.env.SSL_CERT, 'utf8'),
+        ca: fs.readFileSync(process.env.SSL_PRIVKEY, 'utf8'),
     }
     server = https.createServer(credentials, app);
 } else {
