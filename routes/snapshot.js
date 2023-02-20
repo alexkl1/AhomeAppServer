@@ -21,14 +21,12 @@ let demoFileMap = new Map(); // map holds last queried file index of screenshot 
 /**
  * Iteractively return screenshots from demo cameras
  * @param camerdId - cameraid (example: cam1)
- * @returns {Generator<*, Promise<unknown>, *>}
+ * @return buffer | null
  */
 function demoScreenShot(cameraId) {
     const fs = require ('fs');
     while (true) {
         //const cameraId  = yield;
-        console.log("demoscreenshot: ", cameraId);
-        console.log("state: ", demoFileMap);
         let fcontent = null; // buffer to read
         let fileIdx = 1; // default file index
         let fileExists = false;
@@ -41,20 +39,15 @@ function demoScreenShot(cameraId) {
             {
                 // reset to first file
                 fileIdx = 1;
-                fileExists = fs.existsSync(getDemoFile(cameraId, fileIdx));
             }
         }
-        else
-        {
-            // check first index file
-            fileExists = fs.existsSync(getDemoFile(cameraId, fileIdx));
-        }
+
+        // check first index file
+        fileExists = fs.existsSync(getDemoFile(cameraId, fileIdx));
 
         if (fileExists) {
             fcontent = fs.readFileSync(getDemoFile(cameraId, fileIdx), {encoding: 'binary'});
-            console.log("buffer: ", fcontent?.length);
             demoFileMap.set(cameraId, fileIdx);
-            console.log("newstate: ", demoFileMap);
             return fcontent;
         }
         else return null;
@@ -76,7 +69,6 @@ router.get('/', async function (req, res, next) {
         if (req?.headers?.authorization) {
             try {
                 const token = await getAuth(req?.headers?.authorization);
-                //console.log("Token = ", token);
                 try {
                     const camconfig = JSON.parse(token?.cameraconfig).find(i => i?.id === req?.query?.id);
                     //console.log("Cam config = ", camconfig);
@@ -85,10 +77,9 @@ router.get('/', async function (req, res, next) {
                     if (camconfig?.snapshotUrl == 'demo')
                     {
                         const fcontent = demoScreenShot(camconfig?.id);
-                        //console.log("out fcontent = ",fcontent);
                         if (fcontent !== null)
                         {
-                            res.status(200).contentType("image/jpeg").send(fcontent);
+                            res.status(200).contentType("image/jpeg").end(fcontent,"binary");
                         }
                         else
                         {
