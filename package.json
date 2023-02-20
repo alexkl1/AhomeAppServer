@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "startnodemon": "nodemon --exitcrash ./bin/www",
     "startforever": "forever -c 'nodemon --exitcrash' ./bin/www",
     "package": "docker rmi --force alexkl1/ahomeappserver && docker build . -t alexkl1/ahomeappserver"
   },
